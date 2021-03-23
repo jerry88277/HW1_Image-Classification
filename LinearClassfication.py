@@ -24,7 +24,7 @@ def run_gradient_descent(model,
     # optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     iters, losses = [], []
-    iters_sub, train_acc, val_acc, test_acc = [], [], [], []
+    iters_sub, train_acc, val_acc, test_acc, train_acc_top5, val_acc_top5, test_acc_top5 = [], [], [], [], [], [], []
     train_loader = DataLoader(train_data,
                               batch_size=batch_size,
                               shuffle=True)
@@ -51,15 +51,17 @@ def run_gradient_descent(model,
                 train_acc.append(get_accuracy_top1(model, train_data)) # train acc top1
                 val_acc.append(get_accuracy_top1(model, val_data)) # val acc top1
                 test_acc.append(get_accuracy_top1(model, test_data)) # test acc top1
-                # train_acc.append(get_accuracy_top5(model, train_data))  # train acc top5
-                # val_acc.append(get_accuracy_top5(model, val_data)) # val acc top5
-                # test_acc.append(get_accuracy_top5(model, test_data)) # test acc top5
+                # train_acc_top5.append(get_accuracy_top5(model, train_data))  # train acc top5
+                # val_acc_top5.append(get_accuracy_top5(model, val_data)) # val acc top5
+                # test_acc_top5.append(get_accuracy_top5(model, test_data)) # test acc top5
             # increment the iteration number
             n += 1
-    print('The accuaray of Linear perceptron on training set', np.mean(train_acc))
-    print('The accuaray of Linear perceptron Classifier on validation set', np.mean(val_acc))
-    print('The accuaray of Linear perceptron Classifier on testing set', np.mean(test_acc))
-    
+    print('The Top-1 accuaray of Linear perceptron on training set', np.mean(train_acc))
+    print('The Top-1 accuaray of Linear perceptron Classifier on validation set', np.mean(val_acc))
+    print('The Top-1 accuaray of Linear perceptron Classifier on testing set', np.mean(test_acc))
+    # print('The Top-5 accuaray of Linear perceptron on training set', np.mean(train_acc_top5))
+    # print('The Top-5 accuaray of Linear perceptron Classifier on validation set', np.mean(val_acc_top5))
+    # print('The Top-5 accuaray of Linear perceptron Classifier on testing set', np.mean(test_acc_top5))
     # plotting
     plt.figure()
     plt.title("Training Curve (batch_size={}, lr={})".format(batch_size, learning_rate))
@@ -90,20 +92,21 @@ def get_accuracy_top1(model, data):
         total += int(ts.shape[0])
         return correct / total
     
-def get_accuracy_top5(model, data):
-    loader = torch.utils.data.DataLoader(data, batch_size=500)
-    correct, total = 0, 0
-    for xs, ts in loader:
-        zs = model(xs)
-        ts = torch.tensor(ts, dtype=torch.long)
-        pred = zs.max(1, keepdim=True)[1] # get the index of the max logit
-        pred_top5 = zs.max(1, keepdim=True)[1:6] 
-        for i in pred_top5:
-            if i in ts.view_as(i):
-                correct += pred.eq(ts.view_as(pred)).sum().item()
-        print('correct:', correct)
-        total += int(ts.shape[0])
-        return correct / total
+# def get_accuracy_top5(model, data):
+#     loader = torch.utils.data.DataLoader(data, batch_size=500)
+#     correct, total = 0, 0
+#     for xs, ts in loader:
+#         zs = model(xs)
+#         ts = torch.tensor(ts, dtype=torch.long)
+#         pred = zs.max(1, keepdim=True)[1] # get the index of the max logit
+#         pred_top5 = torch.topk(zs, 5, dim = 1)[0]
+#         print('pred_top5:', pred_top5)
+#         for i in pred_top5:
+#             if i in ts.view_as(i):
+#                 correct += pred.eq(ts.view_as(pred)).sum().item()
+#         print('correct:', correct)
+#         total += int(ts.shape[0])
+#         return correct / total
     
     
 # In[] Load Data
